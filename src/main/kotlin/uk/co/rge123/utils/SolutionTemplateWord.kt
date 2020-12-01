@@ -1,4 +1,4 @@
-package main.kotlin.uk.co.rge123
+package main.kotlin.uk.co.rge123.utils
 
 fun main() {
     val solution = solveIt("aeiou")

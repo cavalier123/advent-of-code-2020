@@ -1,7 +1,7 @@
-package main.kotlin.uk.co.rge123
+package main.kotlin.uk.co.rge123.utils
 
 fun main() {
-    val filename = "AocTestData"
+    val filename = "DayOneData"
     val solution = solveItWithWords(splitFileToWordsWhitespaceSeparated(filename))
     print ("Solution is $solution")
 }
