@@ -18,5 +18,4 @@ fun getPasswordInfo(input: String): PasswordInfo {
 
 data class PasswordInfo(val rangeStart: Int, val rangeEnd: Int, val checkedChar: Char, val password: String) {
     fun isValid() = password.count { it == checkedChar } in rangeStart..rangeEnd
-    fun isValidPartTwo() = (password[rangeStart - 1] == checkedChar).xor(password[rangeEnd - 1] == checkedChar)
 }
