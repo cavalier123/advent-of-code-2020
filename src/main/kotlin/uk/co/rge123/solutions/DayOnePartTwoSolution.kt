@@ -16,9 +16,9 @@ fun main() {
 fun solveItDayOnePartTwo(numbers: List<Int>): Int {
 
     var answer = 0
-    loop@ for (i in numbers.indices) {
-        for (j in i until numbers.size) {
-            for (k in j until numbers.size) {
+    loop@ for (i in 0 until numbers.size - 2) {
+        for (j in i + 1 until numbers.size - 1) {
+            for (k in j + 1 until numbers.size) {
                 if (numbers[i] + numbers[j] + numbers[k] == 2020) {
                     println("The numbers we want are ${numbers[i]} ${numbers[j]} ${numbers[k]}")
                     answer = (numbers[i] * numbers[j] * numbers[k])
