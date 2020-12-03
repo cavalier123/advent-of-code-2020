@@ -12,24 +12,18 @@ fun main() {
     print ("Solution is $solution")
 }
 
-var grid = Array(31){i -> Array(400) {j -> 0}}
-
 fun solveItDayThreePartOne(lines: List<String>): Int {
-    var row = 0
-    var column = 0
 
-    for (line in lines) {
-        column = 0;
-        for (char in line) {
+    var grid = Array(31){i -> Array(400) {j -> 0}}
+    
+    for ((row, line) in lines.withIndex()) {
+        for ((column, char) in line.withIndex()) {
             if (char == '#') {
                 grid[column][row] = 1
             }
-            ++column
         }
-        row++
     }
 
-    // 323
     var curRow = 0
     var curCol = 0
     var treeCount = 0
