@@ -12,18 +12,15 @@ fun main() {
     print ("Solution is $solution")
 }
 
-var grid = Array(3000){i -> Array(3000) {j -> 0}}
+var grid = Array(400){i -> Array(400) {j -> 0}}
 
 fun solveItDayThreePartOne(lines: List<String>): Int {
     var row = 0
     var column = 0
 
     for (line in lines) {
-        val repeatedLine = line.repeat(80)
-        print("Line = $row:")
-        println (repeatedLine)
         column = 0;
-        for (char in repeatedLine) {
+        for (char in line) {
             if (char == '#') {
                 grid[column][row] = 1
             }
@@ -38,9 +35,9 @@ fun solveItDayThreePartOne(lines: List<String>): Int {
     var treeCount = 0
 
     while (curRow <= 323) {
-        curRow += 2
-        curCol += 1
-        if (grid[curCol][curRow] == 1) ++ treeCount
+        curRow += 1
+        curCol += 3
+        if (grid[curCol % 31][curRow] == 1) ++ treeCount
     }
 
     return treeCount
