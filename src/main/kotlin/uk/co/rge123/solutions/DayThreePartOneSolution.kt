@@ -12,7 +12,7 @@ fun main() {
     print ("Solution is $solution")
 }
 
-var grid = Array(400){i -> Array(400) {j -> 0}}
+var grid = Array(31){i -> Array(400) {j -> 0}}
 
 fun solveItDayThreePartOne(lines: List<String>): Int {
     var row = 0
