@@ -15,7 +15,7 @@ fun main() {
 fun solveItDayThreePartOne(lines: List<String>): Int {
 
     var grid = Array(31){i -> Array(400) {j -> 0}}
-    
+
     for ((row, line) in lines.withIndex()) {
         for ((column, char) in line.withIndex()) {
             if (char == '#') {
