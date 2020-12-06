@@ -14,7 +14,5 @@ fun solveItDayFivePartOne(lines: List<String>): Int {
 }
 
 fun getPassId(word: String): Int {
-    val rowTotal = word.mapIndexed { i, c -> if (c == 'B') 2.toDouble().pow(6 - i).toInt() else 0}.sum()
-    val colTotal = word.mapIndexed { i, c -> if (c == 'R') 2.toDouble().pow(9 - i).toInt() else 0}.sum()
-    return rowTotal * 8 + colTotal
+    return word.mapIndexed { i, c -> if (c in "BR") 2.0.pow(9 - i).toInt() else 0}.sum()
 }

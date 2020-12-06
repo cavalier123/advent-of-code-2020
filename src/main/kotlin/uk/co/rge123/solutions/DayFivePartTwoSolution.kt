@@ -1,7 +1,6 @@
 package main.kotlin.uk.co.rge123.solutions
 
 import main.kotlin.uk.co.rge123.utils.splitFileToLines
-import kotlin.math.pow
 
 fun main() {
     val filename = "DayFiveData"
