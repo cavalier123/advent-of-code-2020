@@ -14,5 +14,6 @@ fun solveItDayFivePartOne(lines: List<String>): Int {
 }
 
 fun getPassId(word: String): Int {
-    return word.mapIndexed { i, c -> if (c in "BR") 2.0.pow(9 - i).toInt() else 0}.sum()
+    //return word.reversed().mapIndexed { i, c -> if (c in "BR") 2.0.pow(i).toInt() else 0}.sum()
+    return word.reversed().foldIndexed(0) { i, a, c -> a + if (c in "BR") 2.0.pow(i).toInt() else 0}
 }
