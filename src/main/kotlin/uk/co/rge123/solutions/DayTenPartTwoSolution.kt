@@ -10,8 +10,8 @@ fun main() {
 
 fun solveItDayTenPartTwo(numbers: List<Int>): Long {
     val hash = mutableMapOf(Pair(157, 1L))
-    for (index in numbers.size - 2 downTo 0) {
-        hash[numbers[index]] = getTotalRoutesFromChildren(numbers[index], hash)
+    for (number in numbers.slice(numbers.size - 2 downTo 0)) {
+        hash[number] = getTotalRoutesFromChildren(number, hash)
     }
     return getTotalRoutesFromChildren(0, hash)
 }
