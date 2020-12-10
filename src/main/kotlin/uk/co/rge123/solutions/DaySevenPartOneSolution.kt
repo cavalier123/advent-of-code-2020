@@ -44,7 +44,7 @@ fun solveItForDaySevenPartOne(lines: List<String>): Int {
     }
 
     for (entry in bagContainsList.keys) {
-        print ("${entry} >>== ");
+        print ("$entry >>== ");
         val value =  bagContainsList[entry]
         if (value != null) {
             for (thing in value) {
