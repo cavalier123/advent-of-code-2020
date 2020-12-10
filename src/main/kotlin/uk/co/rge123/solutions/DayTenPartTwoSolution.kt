@@ -12,8 +12,7 @@ fun solveItDayTenPartTwo(numbers: List<Int>): Long {
     val hash = HashMap<Int, Long>()
     hash.put(157, 1L)
     for (index in numbers.size - 2 downTo 0) {
-        val curNum = numbers[index]
-        hash[curNum] = getTotalRoutesFromChildren(curNum, hash)
+        hash[numbers[index]] = getTotalRoutesFromChildren(numbers[index], hash)
     }
     return getTotalRoutesFromChildren(0, hash)
 }
