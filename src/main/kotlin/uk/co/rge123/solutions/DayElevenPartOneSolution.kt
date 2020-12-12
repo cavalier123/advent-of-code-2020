@@ -13,7 +13,7 @@ enum class State(var rep: Char) {
     FLOOR('.'), EMPTY_SEAT('L'), FULL_SEAT('#');
     companion object {
         fun toState(char: Char): State {
-            return State.values().find { it.rep == char } ?: State.FLOOR
+            return values().find { it.rep == char } ?: State.FLOOR
         }
     }
 }
@@ -36,11 +36,13 @@ fun solveItDayElevenPartOne(lines: List<String>): Int {
     }
 
     println(Date().time)
-    while (!isEqual(firstGrid, secondGrid)) {
+    var genCount = 0
+    do {
         firstGrid = secondGrid.also {secondGrid = firstGrid}
-        populateGrid(firstGrid, secondGrid)
-    }
+        ++ genCount
+    } while (populateGrid(firstGrid, secondGrid))
     println(Date().time)
+    println("$genCount")
 
     return countOccupied(firstGrid)
 }
@@ -49,19 +51,23 @@ fun solveItDayElevenPartOne(lines: List<String>): Int {
 //If a seat is occupied (#) and four or more seats adjacent to it are also occupied, the seat becomes empty.
 //Otherwise, the seat's state does not change.
 
-fun populateGrid(firstGrid: GridType, secondGrid: GridType) {
+fun populateGrid(firstGrid: GridType, secondGrid: GridType): Boolean {
+    var changed = false
     for (downIndex in 0 until NUM_ROWS) {
         for (acrossIndex in 0 until NUM_COLUMNS) {
             val curState = firstGrid[acrossIndex][downIndex]
             if (curState == State.EMPTY_SEAT && numOccupiedAdjacent(firstGrid, acrossIndex, downIndex) == 0) {
                 secondGrid[acrossIndex][downIndex] = State.FULL_SEAT
+                changed = true
             } else if (curState == State.FULL_SEAT && numOccupiedAdjacent(firstGrid, acrossIndex, downIndex) >= 5) {
                 secondGrid[acrossIndex][downIndex] = State.EMPTY_SEAT
+                changed = true
             } else {
                 secondGrid[acrossIndex][downIndex] = firstGrid[acrossIndex][downIndex]
             }
         }
     }
+    return changed
 }
 
 fun numOccupiedAdjacent(grid: GridType, across: Int, down: Int): Int {
@@ -84,15 +90,6 @@ fun checkOccupiedInDir(grid: GridType, acrossChange: Int, downChange: Int, acros
     }
 
     return false
-}
-
-fun isEqual(firstGrid: GridType, secondGrid: GridType) : Boolean {
-    for (downIndex in 0 until NUM_ROWS) {
-        for (acrossIndex in 0 until NUM_COLUMNS) {
-            if (firstGrid[acrossIndex][downIndex] != secondGrid[acrossIndex][downIndex]) return false
-        }
-    }
-    return true
 }
 
 fun countOccupied(grid: GridType) = grid.flatten().count{ it == State.FULL_SEAT}
