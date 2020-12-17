@@ -49,7 +49,7 @@ fun solveIt(validLines: List<String>): Int {
 
     while (colSets.map {it.size}.maxOrNull() ?: 0 > 1) {
         val singletons = colSets.filter {it.size == 1}.map {it.toList()[0]}.toSet()
-        colSets.filter{ it.size > 1 }.forEach{it.removeAll(singletons)   }
+        colSets.filter{ it.size > 1 }.forEach{ it.removeAll(singletons) }
     }
 
     for (colSet in colSets) {
