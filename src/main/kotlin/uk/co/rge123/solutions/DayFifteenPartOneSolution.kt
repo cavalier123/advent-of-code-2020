@@ -1,5 +1,7 @@
 package main.kotlin.uk.co.rge123.solutions
 
+import java.util.*
+
 fun main() {
     val solution = solveItDayFifteenPartOne()
     print ("Solution is $solution")
@@ -17,9 +19,11 @@ fun solveItDayFifteenPartOne(): Int {
     var curTurn = 7
     var curValue = 0
 
+    println (Date().time)
     do {
         curValue = getNextNum(curValue, curTurn++, hash)
     } while (curTurn < 30000000)
+    println (Date().time)
 
     return curValue
 }

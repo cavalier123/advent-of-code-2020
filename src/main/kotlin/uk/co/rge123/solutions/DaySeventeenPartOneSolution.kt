@@ -57,7 +57,8 @@ fun solveItDaySeventeenPartOne(lines: List<String>): Int {
         secondHyperGrid.clear()
         populateHyperGrid(firstHyperGrid, secondHyperGrid)
         ++ genCount
-    } while (genCount < 6)
+        println("$genCount")
+    } while (genCount < 100)
 
     //println(Date().time)
 
@@ -93,8 +94,6 @@ fun getPointsNear(point: Point): List<Point> {
             .map {Point(it.first + point.first, it.second + point.second,
                     it.third + point.third, it.fourth + point.fourth)}
 }
-// .filter {it != Triple(0,0,0)}
-
 
 fun generateAdajacentPoints(points: List<Point>, state: GridState, activePoints: Set<Point>): Set<Point> {
 
@@ -105,7 +104,7 @@ fun generateAdajacentPoints(points: List<Point>, state: GridState, activePoints:
         for (adj in adjacents) {
             if (adj in activePoints && state == GridState.ACTIVE) {
                 ret.add(adj)
-            } else if (!(adj in activePoints) && state == GridState.INACTIVE) {
+            } else if (adj !in activePoints && state == GridState.INACTIVE) {
                 ret.add(adj)
             }
         }
@@ -116,11 +115,3 @@ fun generateAdajacentPoints(points: List<Point>, state: GridState, activePoints:
 fun countActiveNeighbours(point: Point, activePoints: Set<Point>): Int {
     return generateAdajacentPoints(listOf(point), GridState.ACTIVE, activePoints).size
 }
-
-
-
-//fun numOccupiedAdjacent(grid: GridType, across: Int, down: Int): Int {
-//    return (-1 .. 1).flatMap{ l -> (-1 .. 1).map { r -> l to r} }
-//            .filter { (it != Pair(0,0)) && checkOccupiedInDir(grid, it.first, it.second, across, down)}
-//            .count()
-//}
