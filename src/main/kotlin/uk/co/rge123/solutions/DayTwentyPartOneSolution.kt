@@ -8,24 +8,23 @@ fun main() {
     print ("Solution is $solution")
 }
 
-//Tile 1217:
-//.#....#..#
-//#.#....###
-//##.#....#.
-//##...###..
-//###..#..#.
-//.#...##...
-//#.#..##...
-//#...#.##..
-//#..##....#
-//.##.#..#..
-// width = 10
-// height = 10
-
-enum class Dir {TOP, LEFT, RIGHT, BOTTOM}
+enum class Dir {TOP, LEFT, RIGHT, BOTTOM;
+    fun rotate90Clockwise() = when(this) {
+            TOP -> RIGHT
+            RIGHT -> BOTTOM
+            BOTTOM -> LEFT
+            LEFT -> TOP
+        }
+    fun flipHorizontal() = when(this) {
+        TOP -> BOTTOM
+        RIGHT -> RIGHT
+        BOTTOM -> TOP
+        LEFT -> LEFT
+    }
+}
 
 data class Tile(val number: Int, var entries: Array<Array<Char>>,
-                val nonMatchingEdges: MutableSet<Dir> = mutableSetOf<Dir>(), var used: Boolean = false) {
+                var nonMatchingEdges: MutableSet<Dir> = mutableSetOf<Dir>(), var used: Boolean = false) {
     fun print() {
         println ("Tile = $number")
         for (row in 0 .. 9) {
@@ -46,42 +45,27 @@ data class Tile(val number: Int, var entries: Array<Array<Char>>,
         return nonMatchingEdges.size == 0
     }
     fun rotate90Clockwise() {
-        val newEntries = Array(10) { j -> Array<Char>(10){ i -> '.'} }
-        for (row in 0 .. 9) {
-            for (col in 0 .. 9) {
-                newEntries[row][col] = entries[9 - col][row]
-            }
-        }
-        entries = newEntries
+        rotateNonMatchingEdges90ClockWise()
+        entries = rotateGrid90Clockwise(entries)
     }
-    fun rotate90AntiClockwise() {
-        val newEntries = Array(10) { j -> Array<Char>(10){ i -> '.'} }
-        for (row in 0 .. 9) {
-            for (col in 0 .. 9) {
-                newEntries[row][col] = entries[9 - col][9 - row]
-            }
+    private fun rotateNonMatchingEdges90ClockWise() {
+        val newNonMatchingEdges = mutableSetOf<Dir>()
+        for (dir in nonMatchingEdges) {
+            newNonMatchingEdges.add(dir.rotate90Clockwise())
         }
-        entries = newEntries
+        nonMatchingEdges = newNonMatchingEdges
     }
 
     fun flipHorizontal() {
-        val newEntries = Array(10) { j -> Array<Char>(10){ i -> '.'} }
-        for (row in 0 .. 9) {
-            for (col in 0 .. 9) {
-                newEntries[row][col] = entries[row][9-col]
-            }
-        }
-        entries = newEntries
-
+        flipNonMatchingEdgesHorizontal()
+        entries = flipGridHorizontal(entries)
     }
-    fun flipVertical() {
-        val newEntries = Array(10) { j -> Array<Char>(10){ i -> '.'} }
-        for (row in 0 .. 9) {
-            for (col in 0 .. 9) {
-                newEntries[row][col] = entries[9-row][col]
-            }
+    private fun flipNonMatchingEdgesHorizontal() {
+        val newNonMatchingEdges = mutableSetOf<Dir>()
+        for (dir in nonMatchingEdges) {
+            newNonMatchingEdges.add(dir.flipHorizontal())
         }
-        entries = newEntries
+        nonMatchingEdges = newNonMatchingEdges
     }
 
     fun matchesTop(other: Tile): Boolean {
@@ -116,26 +100,20 @@ data class Tile(val number: Int, var entries: Array<Array<Char>>,
         return true
     }
 
-    fun matches(other: Tile, direction: Dir): Boolean {
-        if (number == other.number) return false
-
-        for (change in 0 .. 9) {
-            when (direction) {
-                Dir.TOP -> if (entries[0][change] != other.entries[9][change]) return false
-                Dir.LEFT -> if (entries[change][0] != other.entries[change][9]) return false
-                Dir.BOTTOM -> if (entries[9][change] != other.entries[0][change]) return false
-                Dir.RIGHT -> if (entries[change][9] != other.entries[change][0]) return false
+    fun matches(other: Tile, direction: Dir) = when (direction) {
+                Dir.TOP -> matchesTop(other)
+                Dir.LEFT -> matchesLeft(other)
+                Dir.BOTTOM -> matchesBottom(other)
+                Dir.RIGHT -> matchesRight(other)
             }
-        }
-        return true
-    }
+
     fun matchesAny(other: Tile): Boolean {
         return Dir.values().count{ matches(other,it) } > 0
     }
 
     fun copyOf(): Tile {
         val copyOfEntries = entries.copyOf()
-        return Tile(number, copyOfEntries)
+        return Tile(number, copyOfEntries, nonMatchingEdges.toMutableSet(), used)
     }
 
     fun matchesOtherTileInDirection(otherTile: Tile, direction: Dir): Boolean {
@@ -184,84 +162,36 @@ fun solveItDayTwentyPartOne(lines: List<String>): Int {
         }
     }
     tileList.add(curTile)
-    //tileList.addAll(getAllRotationsAndFlips(curTile))
 
-    var filteredCornerList = tileList.filter{ hasMaxMatchingSides(it, tileList, 2)}.flatMap { getAllRotationsAndFlips(it)}.toMutableList()
-    println("filtered len = ${filteredCornerList.size}")
+    tileList.forEach {it.setNonMatchingEdges(tileList)}
 
-    var filteredEdgeList = tileList.filter{ hasMaxMatchingSides(it, tileList, 3)}.flatMap { getAllRotationsAndFlips(it)}.toMutableList()
-    println("filtered len = ${filteredEdgeList.size}")
-
-    var filteredInnerList = tileList.filter{ hasMaxMatchingSides(it, tileList, 4)}.flatMap { getAllRotationsAndFlips(it)}.toMutableList()
-    println("filtered len = ${filteredInnerList.size}")
-
-    val allTiles = mutableListOf<Tile>()
-    allTiles.addAll(filteredCornerList)
-    allTiles.addAll(filteredEdgeList)
-    allTiles.addAll(filteredInnerList)
-    for (tile in filteredCornerList) {
-        tile.setNonMatchingEdges(allTiles)
-        if (tile.nonMatchingEdges.size != 2) println ("bummer")
-    }
-    for (tile in filteredEdgeList) {
-        tile.setNonMatchingEdges(allTiles)
-        if (tile.nonMatchingEdges.size != 1) println ("bummer")
-    }
-//    for (tile in filteredInnerList) {
-//        tile.setNonMatchingEdges(allTiles)
-//        if (tile.nonMatchingEdges.size != 0) println ("bummer")
-//    }
-
-//    for (edge in filteredEdgeList) {
-//        println(edge.nonMatchingEdges)
-//    }
+    val corners = tileList.filter{ it.isCorner() }.flatMap { getAllRotationsAndFlips(it)}.toMutableList()
+    val edges = tileList.filter{ it.isSide() }.flatMap { getAllRotationsAndFlips(it)}.toMutableList()
+    val inners = tileList.filter{ it.isInside()}.flatMap { getAllRotationsAndFlips(it)}.toMutableList()
 
     val bigPicture = Array(12) { arrayOfNulls<Tile>(12) }
-    val finalbigPicture = Array(12) { arrayOfNulls<Tile>(12) }
-    //val posStarts = filteredCornerList.filter { it.nonMatchingEdges.equals(setOf(Dir.TOP, Dir.LEFT))}
-
-
-
-
-//    fun recursiveMatch(pos: Int, curBigPicture: Array<Array<Tile?>>, finalBigPicture: Array<Array<Tile?>>,
-//                       corners: MutableList<Tile>, edges: MutableList<Tile>, inner: MutableList<Tile>): Boolean {
-
-
-    // val ret = recursiveMatch(0, bigPicture, finalbigPicture, filteredCornerList, filteredEdgeList, filteredInnerList)
-//  println ("recursive match result = $ret")
-
-
 
     for (row in 0..11) {
         for (col in 0..11) {
             //println("$row, $col")
 
             val tileSet = findMatch(row, col, bigPicture,
-                        filteredCornerList, filteredEdgeList, filteredInnerList)
+                        corners, edges, inners)
             if (tileSet.isNotEmpty()) {
                 //println("found with size ${tileSet.size}")
             } else {
                 println("not found")
             }
-            val tile = tileSet.getOrNull(tileSet.lastIndex)
-            filteredCornerList.removeIf { it.number == tile?.number }
-            filteredEdgeList.removeIf { it.number == tile?.number }
-            filteredInnerList.removeIf { it.number == tile?.number }
+            val tile = tileSet.getOrNull(0)
+            corners.removeIf { it.number == tile?.number }
+            edges.removeIf { it.number == tile?.number }
+            inners.removeIf { it.number == tile?.number }
 
             bigPicture[row][col] = tile
         }
     }
 
-//    for (row in 0 .. 11) {
-//        for (col in 0 .. 11) {
-//            print("${bigPicture[row][col]?.number},")
-//        }
-//        println()
-//    }
-
     val bigGrid = Array(96) { j -> Array(96){ i -> '.'} }
-
-    // val newEntries = Array(10) { j -> Array<Char>(10){ i -> '.'} }
 
     for (row in 0 .. 11) {
         for (col in 0 .. 11) {
@@ -276,16 +206,6 @@ fun solveItDayTwentyPartOne(lines: List<String>): Int {
         }
     }
 
-//    bigPicture[0][0]?.print()
-//    bigPicture[0][1]?.print()
-//
-//    for (row in 0 .. 95) {
-//        for (col in 0 ..95) {
-//            print(bigGrid[row][col])
-//        }
-//        println()
-//    }
-
     var numMonsters = searchGridForSeaMonsters(bigGrid)
     println("num monsters == $numMonsters")
     var numWaves = bigGrid.flatMap{ it.asList() }.count { it == '#'}
@@ -294,40 +214,22 @@ fun solveItDayTwentyPartOne(lines: List<String>): Int {
     var curGrid: Array<Array<Char>> = bigGrid
 
     (1 .. 3).forEach { i ->
-        curGrid = rotateBigGrid90Clockwise(curGrid)
+        curGrid = rotateGrid90Clockwise(curGrid)
         numMonsters = Math.max(numMonsters, searchGridForSeaMonsters(curGrid))
         println("num monsters == $numMonsters")
     }
 
-    curGrid = flipBigGridHorizontal(curGrid)
+    curGrid = flipGridHorizontal(curGrid)
     numMonsters = Math.max(numMonsters, searchGridForSeaMonsters(curGrid))
     println("num monsters == $numMonsters")
 
     (1 .. 3).forEach { i ->
-        curGrid = rotateBigGrid90Clockwise(curGrid)
+        curGrid = rotateGrid90Clockwise(curGrid)
         numMonsters = Math.max(numMonsters, searchGridForSeaMonsters(curGrid))
         println("num monsters == $numMonsters")
     }
 
     return numWaves - (numMonsters * 15)
-
-
-//    val topLeftTile = findMatch(0, 0, bigPicture,
-//            filteredCornerList, filteredEdgeList, filteredInnerList)
-//
-//    if (topLeftTile == null) println ("bummer")
-//    topLeftTile?.print()
-//    bigPicture[0][0] = topLeftTile
-//
-//    val nextTile = findMatch(0, 1, bigPicture,
-//            filteredCornerList, filteredEdgeList, filteredInnerList)
-//
-//    if (nextTile == null) println ("bummer")
-//    nextTile?.print()
-
-    // println ("Num tiles = ${tileList.size}")
-
-    //return filteredCornerList.fold(1L) { cur, new -> cur * new.number.toLong() }
 }
 
 fun getAllRotationsAndFlips(curTile: Tile): List<Tile> {
@@ -348,51 +250,6 @@ fun getAllRotationsAndFlips(curTile: Tile): List<Tile> {
         tileList.add(curTile.copyOf())
     }
     return tileList
-}
-
-fun hasMaxMatchingSides(tile: Tile, tiles: List<Tile>, max: Int): Boolean {
-
-    val rotAndFlips = getAllRotationsAndFlips(tile)
-
-    var maxMatchingSides = 0
-    for (rotAndFlip in rotAndFlips) {
-        val numSidesThatMatch = numSidesThatMatch(rotAndFlip, tiles)
-        maxMatchingSides = Math.max(maxMatchingSides, numSidesThatMatch)
-    }
-
-    return maxMatchingSides == max
-
-}
-
-
-fun numSidesThatMatch(tile: Tile, tiles: List<Tile>): Int {
-
-    var numSidesThatMatch = 0
-
-    for (dir in Dir.values()) {
-        for (curTile in tiles) {
-            if (curTile == tile) continue
-            if (tile.matchesOtherTileInDirection(curTile, dir)) {
-                numSidesThatMatch += 1
-                break
-            }
-        }
-    }
-
-    return numSidesThatMatch
-}
-
-
-fun setNonMatchingEdges(tile: Tile, tiles: List<Tile>) {
-    for (dir in Dir.values()) {
-        for (curTile in tiles) {
-            if (curTile == tile) continue
-            if (tile.matchesOtherTileInDirection(curTile, dir)) {
-                tile.nonMatchingEdges.add(dir)
-                break
-            }
-        }
-    }
 }
 
 fun findMatch(row: Int, col:Int, bigPicture: Array<Array<Tile?>>,
@@ -449,95 +306,29 @@ fun findFineMatch(unmatchedDirs: Set<Dir>, topTile: Tile?, leftTile: Tile?, tile
     return ret
 }
 
-fun recursiveMatch(pos: Int, curBigPicture: Array<Array<Tile?>>, finalBigPicture: Array<Array<Tile?>>,
-                   corners: MutableList<Tile>, edges: MutableList<Tile>, inner: MutableList<Tile>): Boolean {
-
-    //println("at pos $pos")
-
-    val tileSet = findMatch(pos / 12, pos % 12, curBigPicture,
-            corners, edges, inner)
-    if (tileSet.isEmpty()) {
-        //println("no tiles found at at pos $pos")
-        return false// no match found on this route
-    }
-    println("${tileSet.size} tiles found at at pos $pos")
-
-    // foun d a match in final pos we are finished!
-    if (pos == 143) {
-        curBigPicture[pos / 12][pos % 12] = tileSet[0]
-
-        for (row in 0 .. 11) {
-            for (col in 0 .. 11) {
-                finalBigPicture[row][col] = curBigPicture[row][col]
-            }
-        }
-        return true
-    }
-
-    for (tile in tileSet) {
-
-        curBigPicture[pos / 12][pos % 12] = tile
-
-        if (tile.isCorner()) {
-            corners.filter { it.number == tile.number}.forEach {it.used = true}
-        } else if (tile.isSide()) {
-            edges.filter { it.number == tile.number}.forEach {it.used = true}
-        } else {
-            inner.filter { it.number == tile.number}.forEach {it.used = true}
-        }
-
-        val ret = recursiveMatch(pos + 1, curBigPicture, finalBigPicture, corners, edges, inner)
-
-        if (tile.isCorner()) {
-            corners.filter { it.number == tile.number}.forEach {it.used = false}
-        } else if (tile.isSide()) {
-            edges.filter { it.number == tile.number}.forEach {it.used = false}
-        } else {
-            inner.filter { it.number == tile.number}.forEach {it.used = false}
-        }
-
-        curBigPicture[pos / 12][pos % 12] = null
-
-        if (ret) return true
-    }
-
-    return false
-
-//    val tile = tileSet.getOrNull(tileSet.lastIndex)
-//    filteredCornerList.removeIf { it.number == tile?.number }
-//    filteredEdgeList.removeIf { it.number == tile?.number }
-//    filteredInnerList.removeIf { it.number == tile?.number }
-//
-
-}
-
-fun rotateBigGrid90Clockwise(bigGrid: Array<Array<Char>>): Array<Array<Char>> {
-    val newGrid = Array(96) { j -> Array(96){ i -> '.'} }
-    for (row in 0 .. 95) {
-        for (col in 0 .. 95) {
-            newGrid[row][col] = bigGrid[95 - col][row]
-        }
-    }
+fun rotateGrid90Clockwise(grid: Array<Array<Char>>): Array<Array<Char>> {
+    val origGridHeight = grid.size
+    val origGridWidth = grid[0].size
+    val newGrid = Array(origGridWidth) { row -> Array(origGridHeight) { '.' } }
+    (0 until origGridHeight).flatMap { row -> (0 until origGridWidth).map { col -> Pair(row, col) }}
+            .forEach{newGrid[it.second][it.first] = grid[origGridHeight - 1 - it.first][it.second]}
     return newGrid
 }
 
-fun flipBigGridHorizontal(bigGrid: Array<Array<Char>>): Array<Array<Char>> {
-    val newGrid = Array(96) { j -> Array<Char>(96){ i -> '.'} }
-    for (row in 0 .. 95) {
-        for (col in 0 .. 95) {
-            newGrid[row][col] = bigGrid[row][95-col]
-        }
-    }
+fun flipGridHorizontal(grid: Array<Array<Char>>): Array<Array<Char>> {
+    val gridHeight = grid.size
+    val gridWidth = grid[0].size
+    val newGrid = Array(gridWidth) { row -> Array(gridHeight) { '.' } }
+    (0 until gridHeight).flatMap { row -> (0 until gridWidth).map { col -> Pair(row, col) }}
+            .forEach{newGrid[gridHeight - 1 - it.first][it.second] = grid[it.first][it.second]}
     return newGrid
 }
-
 
 //"                  # "             20 across,  3 down
 //"#    ##    ##    ###"
 //" #  #  #  #  #  #   "
 
 val monsterStrings = listOf("                  # ", "#    ##    ##    ###", " #  #  #  #  #  #   ")
-
 
 fun searchGridForSeaMonsters(bigGrid: Array<Array<Char>>): Int {
     var seaMonsterCount = 0
