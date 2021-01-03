@@ -8,33 +8,39 @@ fun main() {
     print ("Solution is $solution")
 }
 
-enum class Dir {TOP, LEFT, RIGHT, BOTTOM;
-    fun rotate90Clockwise() = when(this) {
-            TOP -> RIGHT
-            RIGHT -> BOTTOM
-            BOTTOM -> LEFT
-            LEFT -> TOP
-        }
+enum class Dir {TOP, RIGHT, BOTTOM, LEFT;
+
+    fun rotate90Clockwise(): Dir {
+        return values()[(ordinal + 1) % values().size]
+    }
     fun flipHorizontal() = when(this) {
         TOP -> BOTTOM
-        RIGHT -> RIGHT
         BOTTOM -> TOP
-        LEFT -> LEFT
+        else -> this
     }
 }
 
+/**
+ * Data class representing a tile. A tile has an identifying number, a set of entries in a grid, a set of directions
+ * in which this tile does not match any other tiles, and a flag to indicate if the tile has been "used".
+ */
 data class Tile(val number: Int, var entries: Array<Array<Char>>,
                 var nonMatchingEdges: MutableSet<Dir> = mutableSetOf<Dir>(), var used: Boolean = false) {
-    fun print() {
-        println ("Tile = $number")
+
+    override fun toString(): String {
+        val buf = StringBuffer()
+        buf.append("Tile = $number\n")
+        buf.append("Non matching edges = $nonMatchingEdges\n")
+        buf.append("Used = $used\n")
         for (row in 0 .. 9) {
             for (col in 0 ..9) {
-                print(entries[row][col])
+                buf.append(entries[row][col])
             }
-            println()
+            buf.append("\n")
         }
-        println("Non matching edges = $nonMatchingEdges")
+        return buf.toString()
     }
+
     fun isCorner(): Boolean {
         return nonMatchingEdges.size == 2
     }
@@ -130,8 +136,7 @@ data class Tile(val number: Int, var entries: Array<Array<Char>>,
         nonMatchingEdges.addAll(Dir.values())
         for (dir in Dir.values()) {
             for (curTile in tiles) {
-                if (curTile.number == number) continue
-                if (matchesOtherTileInDirection(curTile, dir)) {
+                if (curTile.number != number && matchesOtherTileInDirection(curTile, dir)) {
                     nonMatchingEdges.remove(dir)
                     break
                 }
@@ -173,7 +178,6 @@ fun solveItDayTwentyPartOne(lines: List<String>): Int {
 
     for (row in 0..11) {
         for (col in 0..11) {
-            //println("$row, $col")
 
             val tileSet = findMatch(row, col, bigPicture,
                         corners, edges, inners)
@@ -183,9 +187,9 @@ fun solveItDayTwentyPartOne(lines: List<String>): Int {
                 println("not found")
             }
             val tile = tileSet.getOrNull(0)
-            corners.removeIf { it.number == tile?.number }
-            edges.removeIf { it.number == tile?.number }
-            inners.removeIf { it.number == tile?.number }
+            tile?.isCorner()?.apply { corners.removeIf { it.number == tile.number } }
+            tile?.isSide()?.apply { edges.removeIf { it.number == tile.number } }
+            tile?.isInside()?.apply { inners.removeIf { it.number == tile.number } }
 
             bigPicture[row][col] = tile
         }
@@ -288,8 +292,6 @@ fun findMatch(row: Int, col:Int, bigPicture: Array<Array<Tile?>>,
         return findFineMatch(emptyDirs, bigPicture[row-1][col], bigPicture[row][col - 1], inner)
     }
 
-    return mutableListOf<Tile>() // not found
-
 }
 
 fun findFineMatch(unmatchedDirs: Set<Dir>, topTile: Tile?, leftTile: Tile?, tiles: List<Tile>) : List<Tile> {
@@ -348,7 +350,6 @@ fun isSeaMonsterAt(row: Int, col: Int, bigGrid: Array<Array<Char>>): Boolean {
     }
     return true
 }
-
 
 
 
