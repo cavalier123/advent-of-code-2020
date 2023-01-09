@@ -42,13 +42,14 @@ fun solveItDay21Part1(lines: List<String>): Int {
             if (entry.value.size == 1) {
                 for (otherEntry in hash.entries) {
                     if (otherEntry.key != entry.key) {
-                        if (hash[otherEntry.key]?.contains(entry.value) == true) changed = true
+                        val setToSearch: Set<String>? = hash[otherEntry.key]
+                        //if (setToSearch?.contains(entry.value) == true) changed = true
                         hash[otherEntry.key] = otherEntry.value.minus(entry.value)
                     }
                 }
             }
         }
-    } while (hash.map{it.value.size}.max() ?: 0 > 1)
+    } while (hash.map{it.value.size}.maxOrNull() ?: 0 > 1)
 
     println("-------")
     for (key in hash.keys) {

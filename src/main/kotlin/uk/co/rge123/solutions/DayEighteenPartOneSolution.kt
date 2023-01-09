@@ -20,7 +20,7 @@ fun toExprEl(char: Char): ExprEl {
     return when (char) {
         '(' -> OpenBracket()
         ')' -> CloseBracket()
-        in '0'..'9' -> Number(char.toLong() - 48)
+        in '0'..'9' -> Number(char.code.toLong() - 48)
         '+' -> Plus()
         '*' -> Multiply()
         else -> Unknown()
@@ -53,6 +53,7 @@ fun getReversePolish(exprEls: List<ExprEl>): List<ExprEl> {
             }
             is Number -> revPolish.add(exprEl)
             is Plus, is Multiply, is CloseBracket -> opStack.addFirst(exprEl)
+            else -> revPolish.add(exprEl) // rubbish
         }
     }
     while (opStack.isNotEmpty()) {
@@ -83,6 +84,7 @@ fun getReversePolishPlusBeatsTimes(exprEls: List<ExprEl>): List<ExprEl> {
                 opStack.addFirst(exprEl)
             }
             is CloseBracket -> opStack.addFirst(exprEl)
+            else -> revPolish.add(exprEl) //rubbish
         }
     }
     while (opStack.isNotEmpty()) {
@@ -106,6 +108,7 @@ fun evalReversedPolish(exprEls: List<ExprEl>): Long {
                     opStack.addFirst(Number((arg1 as Number).number * (arg2 as Number).number))
                 }
             }
+            else -> opStack.addFirst(exprEl) //rubbish
         }
     }
     return (opStack.first() as Number).number

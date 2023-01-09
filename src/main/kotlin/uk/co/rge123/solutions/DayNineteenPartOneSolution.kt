@@ -142,8 +142,8 @@ fun solveItDayNineteenPartOne(lines: List<String>): Int {
     //println ("Num snips for rule 0 = ${rules[0].snips.size}")
     val rawStrings = rules[0].getRawStrings()
     println ("raw strings size = ${rawStrings.size}")
-    val minLen = rawStrings.map{it.length}.min()
-    val maxLen = rawStrings.map{it.length}.max()
+    val minLen = rawStrings.map{it.length}.minOrNull()
+    val maxLen = rawStrings.map{it.length}.maxOrNull()
     println ("range = $minLen to $maxLen")
 
 //    for (rawStringIndex in rawStrings.indices)
